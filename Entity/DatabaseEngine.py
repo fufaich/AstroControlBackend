@@ -51,7 +51,7 @@ class DatabaseEngine:
 
     def add(self, db_object: DbObject):
         if db_object.table_name is None:
-            return -1 #TODO Доделать вывод ошибки
+            return -1
         list_attributes, list_values = db_object.get_attributes()
         str_attributes = get_str_attributes(list_attributes)
         str_values = get_str_values(list_values)
