@@ -6,7 +6,7 @@ from contextlib import contextmanager
 from typing import Optional
 
 from Entity.DbObject import DbObject
-from utils.utils import get_str_attributes, get_str_values
+from utils.utils import get_str_attributes, get_str_values, clean_dict
 
 
 # Класс для конфигурации базы данных
@@ -48,6 +48,32 @@ class DatabaseEngine:
         conn.commit()
         cur.close()
         conn.close()
+
+    def get_first_n_collumns_name(self, table_name:str, n:int):
+        sql_query = f"SELECT column_name FROM information_schema.columns WHERE table_name = \'{table_name}\' ORDER BY ordinal_position LIMIT {n}"
+        conn = get_db_connection(self.config)
+        if conn is None:
+            return -1
+        cur = conn.cursor()
+        result = list()
+        tmpresult = []
+        try:
+            cur.execute(sql_query)
+            tmpresult = cur.fetchall()
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            cur.close()
+            conn.close()
+            return None
+        finally:
+            cur.close()
+            conn.close()
+            if len(tmpresult) != 0:
+                for i in range(len(tmpresult)):
+                    result.append(tmpresult[i][0])
+
+            return result
 
     def add(self, db_object: DbObject):
         if db_object.table_name is None:
@@ -101,3 +127,52 @@ class DatabaseEngine:
             conn.close()
 
         return data
+
+    def update(self, db_object: DbObject):
+        if db_object.table_name is None:
+            return -1
+        sql_query = f"UPDATE \"{db_object.table_name}\" SET "
+        dict_attributes = db_object.get_dict_attributes()
+        dict_attributes = clean_dict(dict_attributes)
+        for key, value in dict_attributes.items():
+            sql_query+= f" \"{key}\" = \'{value}\', "
+
+        sql_query = sql_query[:-2]
+        id_collumn_name = self.get_first_n_collumns_name(db_object.table_name, 1)
+
+        sql_query += f" WHERE {id_collumn_name[0]} = {db_object.id}"
+        conn = get_db_connection(self.config)
+        cur = conn.cursor()
+        try:
+            cur.execute(sql_query)
+            conn.commit()
+            message = {'message': 'Rows updated'}
+            status = 200
+        except Exception as e:
+            conn.rollback()
+            message = {'error': f'Error: {e}'}
+            status = 400
+        finally:
+            cur.close()
+            conn.close()
+        return jsonify(message), status
+
+    def delete(self, table_name:str, id: int):
+        conn = get_db_connection(self.config)
+        cur = conn.cursor()
+        id_collumn_name = self.get_first_n_collumns_name(table_name, 1)[0]
+
+        sql_query = f"DELETE FROM \"{table_name}\" WHERE {id_collumn_name} = {id}"
+        try:
+            cur.execute(sql_query)
+            conn.commit()
+        except Exception as e:
+            conn.rollback()
+            message = {'error': f'Error: {e}'}
+            status = 400
+            return jsonify(message), status
+        finally:
+            cur.close()
+            conn.close()
+            status = 200
+            return jsonify({'message': 'Row deleted!'}), status

@@ -22,3 +22,11 @@ def get_str_values(list_values):
     list_values = [str(i.date()) if isinstance(i, datetime) else str(i) for i in list_values]
     str_values = ", ".join([f"'{item}'" for item in list_values])
     return str_values
+
+def clean_dict(dictionary: dict[str, any]) -> dict[str, any]:
+    result = {}
+    for key, value in dictionary.items():
+        if value is not None and not key.startswith('_'):
+            result[key] = value
+
+    return result

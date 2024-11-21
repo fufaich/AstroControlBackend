@@ -38,10 +38,21 @@ def create_employee():
 @app.route('/employee', methods=['GET'])
 def get_employee():
     filters = {key: value for key, value in request.args.items()}
-
-
-
     result = db_engine.get("Employee", filters)
+    return result
+
+@app.route('/employee/<int:employee_id>', methods=['DELETE'])
+def update_employee(employee_id):
+    result = db_engine.delete("Employee", employee_id)
+    return result
+
+
+@app.route('/employee/<int:employee_id>', methods=['PUT'])
+def delete_employee(employee_id):
+    data = request.get_json()
+    data['id'] = employee_id
+    employee = Employee.from_json_for_update("Employee", data)
+    result = db_engine.update(employee)
     return result
 
 if __name__ == '__main__':

@@ -26,4 +26,20 @@ class Employee(DbObject):
 
         return cls(data['id'], table_name, data['surname'], data['name'], data['middle_name'], data['post'], data['specialization'], datetime_of_birth, data['status_employee'])
 
+    @classmethod
+    def clean(cls):
+        return cls(None,None,None,None,None,None,None,None,None)
+
+
+    @classmethod
+    def from_json_for_update(cls, table_name:str ,data: dict[str, str]):
+        if 'id' not in data:
+            data['id'] = None
+        tmp = Employee.clean()
+        tmp.table_name = table_name
+        for key in data.keys():
+            if hasattr(tmp, key):
+                setattr(tmp, key, data[key])
+
+        return tmp
 
