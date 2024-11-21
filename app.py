@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 import Secrets
 from Entity.DatabaseEngine import DatabaseConfig, DatabaseEngine
 from Entity.Employee import Employee
+from utils.utils import create_db_object
 
 app = Flask(__name__)
 
@@ -24,36 +25,46 @@ def home():  # put application's code here
     return result
 
 
-@app.route('/employee', methods=['POST'])
-def create_employee():
+@app.route('/<string:table_name>', methods=['POST'])
+def create_employee(table_name:str):
     data = request.get_json()
     try:
-        employee = Employee.from_json(table_name="Employee",data=data)
+        object = create_db_object(table_name=table_name, data=data)
     except KeyError as e:
         return jsonify({"error": str(e)}), 400
-    result = db_engine.add(employee)
-    print(result)
+    result = db_engine.add(object)
     return result
 
-@app.route('/employee', methods=['GET'])
-def get_employee():
+@app.route('/<string:table_name>', methods=['GET'])
+def get_object(table_name:str):
     filters = {key: value for key, value in request.args.items()}
-    result = db_engine.get("Employee", filters)
+    result = db_engine.get(table_name, filters)
     return result
 
-@app.route('/employee/<int:employee_id>', methods=['DELETE'])
-def update_employee(employee_id):
-    result = db_engine.delete("Employee", employee_id)
+@app.route('/<string:table_name>', methods=['DELETE'])
+def update_object(table_name:str):
+    primary_keys = request.get_json()
+
+    if not primary_keys:
+        return jsonify({'error': 'Primary key values are required'}), 400
+
+
+    result = db_engine.delete(table_name, primary_keys)
     return result
 
 
-@app.route('/employee/<int:employee_id>', methods=['PUT'])
-def delete_employee(employee_id):
+@app.route('/table_name:str/<int:employee_id>', methods=['PUT'])
+def delete_object(table_name:str, employee_id: int):
     data = request.get_json()
     data['id'] = employee_id
-    employee = Employee.from_json_for_update("Employee", data)
-    result = db_engine.update(employee)
+
+    try:
+        object = create_db_object(table_name=table_name, data=data)
+    except KeyError as e:
+        return jsonify({"error": str(e)}), 400
+
+    result = db_engine.update(object)
     return result
 
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0')

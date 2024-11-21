@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from Entity.DbObject import DbObject
-from utils.utils import parse_datetime
 
 
 class Employee(DbObject):
@@ -40,6 +39,5 @@ class Employee(DbObject):
         for key in data.keys():
             if hasattr(tmp, key):
                 setattr(tmp, key, data[key])
-
         return tmp
 

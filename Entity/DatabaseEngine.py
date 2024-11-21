@@ -49,8 +49,12 @@ class DatabaseEngine:
         cur.close()
         conn.close()
 
-    def get_first_n_collumns_name(self, table_name:str, n:int):
-        sql_query = f"SELECT column_name FROM information_schema.columns WHERE table_name = \'{table_name}\' ORDER BY ordinal_position LIMIT {n}"
+    def get_first_n_collumns_name(self, table_name:str):
+        # sql_query = f"SELECT column_name FROM information_schema.columns WHERE table_name = \'{table_name}\' ORDER BY ordinal_position LIMIT {n}"
+
+
+
+        sql_query = f"SELECT kcu.column_name FROM information_schema.table_constraints tc JOIN information_schema.key_column_usage kcu ON tc.constraint_name = kcu.constraint_name WHERE tc.table_name = \'{table_name}\' AND tc.constraint_type = 'PRIMARY KEY';"
         conn = get_db_connection(self.config)
         if conn is None:
             return -1
@@ -83,7 +87,7 @@ class DatabaseEngine:
         str_values = get_str_values(list_values)
 
         sql_query = f"INSERT INTO \"{db_object.table_name}\" ({str_attributes}) VALUES ({str_values}) RETURNING *"
-
+        print(sql_query)
         conn = get_db_connection(self.config)
         if conn is None:
             return -1
@@ -138,9 +142,19 @@ class DatabaseEngine:
             sql_query+= f" \"{key}\" = \'{value}\', "
 
         sql_query = sql_query[:-2]
-        id_collumn_name = self.get_first_n_collumns_name(db_object.table_name, 1)
+        id_collumn_name = self.get_first_n_collumns_name(db_object.table_name)
+        len_pk = len(id_collumn_name)
+        if len_pk == 1:
+            sql_query += f" WHERE {id_collumn_name[0]} = {db_object.id}"
+        else:
+            sql_query += f" WHERE "
+            for i in range(len_pk):
+                if i == len_pk - 1:
+                    sql_query += f" {id_collumn_name[i]} = \'{db_object.id}\'"
+                else:
+                    sql_query += f" {id_collumn_name[i]} = \'{db_object.id}\' AND "
 
-        sql_query += f" WHERE {id_collumn_name[0]} = {db_object.id}"
+
         conn = get_db_connection(self.config)
         cur = conn.cursor()
         try:
@@ -157,12 +171,28 @@ class DatabaseEngine:
             conn.close()
         return jsonify(message), status
 
-    def delete(self, table_name:str, id: int):
+    def delete(self, table_name:str, primary_keys: dict):
         conn = get_db_connection(self.config)
         cur = conn.cursor()
-        id_collumn_name = self.get_first_n_collumns_name(table_name, 1)[0]
 
-        sql_query = f"DELETE FROM \"{table_name}\" WHERE {id_collumn_name} = {id}"
+        sql_query = f"DELETE FROM \"{table_name}\" "
+
+        id_collumn_name = self.get_first_n_collumns_name(table_name)
+        len_pk = len(id_collumn_name)
+
+        if len_pk!= len(primary_keys):
+            raise ValueError("Mismatch between primary key structure and provided values")
+
+        if len_pk == 1:
+            sql_query += f" WHERE {id_collumn_name[0]} = {primary_keys[id_collumn_name[0]]}"
+        else:
+            sql_query += f" WHERE "
+            for i in range(len_pk):
+                if i == len_pk - 1:
+                    sql_query += f" {id_collumn_name[i]} = \'{primary_keys[id_collumn_name[i]]}\'"
+                else:
+                    sql_query += f" {id_collumn_name[i]} = \'{primary_keys[id_collumn_name[i]]}\' AND "
+        print(sql_query)
         try:
             cur.execute(sql_query)
             conn.commit()

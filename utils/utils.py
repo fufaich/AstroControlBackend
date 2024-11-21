@@ -1,5 +1,13 @@
 from datetime import datetime
 
+from Entity.CompletedTasks import CompletedTasks
+from Entity.Employee import Employee
+from Entity.ExperimentJournal import ExperimentJournal
+from Entity.Mission import Mission
+from Entity.ReportsJournal import ReportsJournal
+from Entity.Resources import Resources
+from Entity.TaskJournal import TaskJournal
+
 
 def parse_datetime(date_str: str) -> datetime|None:
     """
@@ -30,3 +38,41 @@ def clean_dict(dictionary: dict[str, any]) -> dict[str, any]:
             result[key] = value
 
     return result
+
+def create_db_object(table_name:str, data:dict[str, any]):
+    match table_name:
+        case "Employee":
+            return Employee.from_json(table_name=table_name ,data=data)
+        case "CompletedTasks":
+            return CompletedTasks.from_json(table_name=table_name ,data=data)
+        case "ExperimentJournal":
+            return ExperimentJournal.from_json(table_name=table_name ,data=data)
+        case "Mission":
+            return Mission.from_json(table_name=table_name, data=data)
+        case "ReportsJournal":
+            return ReportsJournal.from_json(table_name=table_name, data=data)
+        case "Resources":
+            return Resources.from_json(table_name=table_name, data=data)
+        case "TaskJournal":
+            return TaskJournal.from_json(table_name=table_name, data=data)
+        case "_":
+            return None
+
+def create_db_object_for_update(table_name:str, data:dict[str, any]):
+    match table_name:
+        case "Employee":
+            return Employee.from_json_for_update(table_name=table_name ,data=data)
+        case "CompletedTasks":
+            return CompletedTasks.from_json_for_update(table_name=table_name ,data=data)
+        case "ExperimentJournal":
+            return ExperimentJournal.from_json_for_update(table_name=table_name ,data=data)
+        case "Mission":
+            return Mission.from_json_for_update(table_name=table_name, data=data)
+        case "ReportsJournal":
+            return ReportsJournal.from_json_for_update(table_name=table_name, data=data)
+        case "Resources":
+            return Resources.from_json_for_update(table_name=table_name, data=data)
+        case "TaskJournal":
+            return TaskJournal.from_json_for_update(table_name=table_name, data=data)
+        case "_":
+            return None
