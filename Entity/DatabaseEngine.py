@@ -78,14 +78,26 @@ class DatabaseEngine:
 
         return jsonify(message), status
 
-    def get(self, table_name: str, filter: str=""):
+    def get(self, table_name: str, filters: dict):
+
+        query = f"SELECT * FROM \"{table_name}\" WHERE TRUE"
+        filter_values = []
+
+        if filters:
+            for column, value in filters.items():
+                query += f" AND {column} ILIKE %s"  # Используем ILIKE для нечувствительности к регистру
+                filter_values.append(f"%{value}%")
 
         conn = get_db_connection(self.config)
-        if conn is None:
-            return -1
         cur = conn.cursor()
-        cur.execute(f'SELECT * FROM \"{table_name}\"')
-        list_response = cur.fetchall()
-        cur.close()
-        conn.close()
-        return list_response
+        try:
+            cur.execute(query, filter_values)
+            data = cur.fetchall()
+        except Exception:
+            conn.rollback()
+            data = {'message': 'invalid filter'}
+        finally:
+            cur.close()
+            conn.close()
+
+        return data

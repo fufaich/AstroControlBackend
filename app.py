@@ -27,14 +27,21 @@ def home():  # put application's code here
 @app.route('/employee', methods=['POST'])
 def create_employee():
     data = request.get_json()
-    employee = Employee.from_json(table_name="Employee",data=data)
+    try:
+        employee = Employee.from_json(table_name="Employee",data=data)
+    except KeyError as e:
+        return jsonify({"error": str(e)}), 400
     result = db_engine.add(employee)
     print(result)
     return result
 
 @app.route('/employee', methods=['GET'])
 def get_employee():
-    result = db_engine.get("Employee", None)
+    filters = {key: value for key, value in request.args.items()}
+
+
+
+    result = db_engine.get("Employee", filters)
     return result
 
 if __name__ == '__main__':
