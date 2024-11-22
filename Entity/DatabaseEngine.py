@@ -206,3 +206,17 @@ class DatabaseEngine:
             conn.close()
             status = 200
             return jsonify({'message': 'Row deleted!'}), status
+
+    def get_user(self, username):
+        """Возвращает None или id pass_hash role"""
+        conn = get_db_connection(self.config)
+        cur = conn.cursor()
+
+        cur.execute(f"SELECT id_user, pass_hash, role FROM users WHERE username = \'{username}\'")
+        user = cur.fetchone()
+        cur.close()
+        conn.close()
+        if user is None:
+            return None
+        return user[0], user[1], user[2]
+

@@ -1,11 +1,15 @@
 
 from flask import Flask, jsonify, request
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+import bcrypt
 import Secrets
 from Entity.DatabaseEngine import DatabaseConfig, DatabaseEngine
 from Entity.Employee import Employee
 from utils.utils import create_db_object
 
 app = Flask(__name__)
+app.config['JWT_SECRET_KEY'] = Secrets.JWT_SECRET_KEY
+jwt = JWTManager(app)
 
 config = DatabaseConfig(
         dbname = "aero_managment",
@@ -24,6 +28,31 @@ def home():  # put application's code here
     print(result)
     return result
 
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    username = data['username']
+    password = data['password']
+
+    if not username or not password:
+        return jsonify({'message': 'Missing username or password'}), 400
+
+    user = db_engine.get_user(username)
+    if user is None:
+        return jsonify({'message': 'Invalid username or password'}), 401
+
+    user_id, pass_hash, role = user
+    salt = bcrypt.gensalt()
+    if not bcrypt.checkpw(password.encode('utf-8'), pass_hash.encode('utf-8')):
+        return jsonify({'error': 'Invalid username or password'}), 401
+
+    access_token = create_access_token(identity=username)
+    return jsonify({'access_token': access_token}), 200
+
+@app.route('/protected', methods=['GET'])
+@jwt_required()
+def protected():
+    return "This is a protected route"
 
 @app.route('/<string:table_name>', methods=['POST'])
 def create_employee(table_name:str):
@@ -42,7 +71,7 @@ def get_object(table_name:str):
     return result
 
 @app.route('/<string:table_name>', methods=['DELETE'])
-def update_object(table_name:str):
+def delete_object(table_name:str):
     primary_keys = request.get_json()
 
     if not primary_keys:
@@ -54,7 +83,7 @@ def update_object(table_name:str):
 
 
 @app.route('/table_name:str/<int:employee_id>', methods=['PUT'])
-def delete_object(table_name:str, employee_id: int):
+def update_object(table_name:str, employee_id: int):
     data = request.get_json()
     data['id'] = employee_id
 
