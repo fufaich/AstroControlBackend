@@ -1,3 +1,4 @@
+import json
 
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
@@ -46,13 +47,21 @@ def login():
     if not bcrypt.checkpw(password.encode('utf-8'), pass_hash.encode('utf-8')):
         return jsonify({'error': 'Invalid username or password'}), 401
 
-    access_token = create_access_token(identity=username)
+    user_info = {
+        "user_id" : user_id,
+        "username" : username,
+        "role" : role
+    }
+    access_token = create_access_token(identity=json.dumps(user_info)) ##TODO Доделать парсинг на выходе в словарь эти данные
     return jsonify({'access_token': access_token}), 200
 
 @app.route('/protected', methods=['GET'])
 @jwt_required()
 def protected():
-    return "This is a protected route"
+    current_user = get_jwt_identity() # Это значение 'sub' из токена
+    print(current_user)
+    user_info = json.loads(current_user)
+    return jsonify(logged_in_as=user_info["username"]), 200
 
 @app.route('/<string:table_name>', methods=['POST'])
 def create_employee(table_name:str):
