@@ -1,7 +1,8 @@
 import json
+from functools import wraps
 
 from flask import Flask, jsonify, request
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity, get_jwt
 import bcrypt
 import Secrets
 from Entity.DatabaseEngine import DatabaseConfig, DatabaseEngine
@@ -22,6 +23,19 @@ config = DatabaseConfig(
 
 db_engine = DatabaseEngine(config)
 
+def roles_required(*required_roles):
+    def decorator(fn):
+        @wraps(fn)
+        @jwt_required()
+        def wrapper(*args, **kwargs):
+            current_user = get_jwt_identity()  # Это значение 'sub' из токена
+            user_info = json.loads(current_user)
+            if user_info['role'] not in required_roles:
+                return jsonify({"msg": f"Access forbidden: Requires one of roles {required_roles}"}), 403
+
+            return fn(*args, **kwargs)
+        return wrapper
+    return decorator
 
 @app.route('/')
 def home():  # put application's code here
@@ -56,7 +70,7 @@ def login():
     return jsonify({'access_token': access_token}), 200
 
 @app.route('/protected', methods=['GET'])
-@jwt_required()
+@roles_required("admin", "austronaut")
 def protected():
     current_user = get_jwt_identity() # Это значение 'sub' из токена
     print(current_user)
