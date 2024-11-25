@@ -15,7 +15,7 @@ employee_service = EmployeeService()
 @employee_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_employees():
-    filters = request.args.to_dict()
+    filters = request.json
     current_user = get_jwt_identity()  # Это значение 'sub' из токена
     user_info = json.loads(current_user)
     if "role" not in user_info:

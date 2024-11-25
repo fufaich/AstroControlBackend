@@ -95,7 +95,7 @@ class DatabaseEngine:
 
         if filters:
             for column, value in filters.items():
-                query += f" AND {column} = {value}"  # Используем ILIKE для нечувствительности к регистру
+                query += f" AND {column} = \'{value}\'"
 
 
         conn = get_db_connection(self.config)
