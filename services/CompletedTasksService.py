@@ -1,55 +1,56 @@
-from Entity.Employee import Employee
+from Entity.CompletedTasks import CompletedTasks
 from database.DatabaseEngine import DatabaseEngine
 from database.DatabaseConfig import DatabaseConfig
 
-class EmployeeService:
+class CompletedTasksService:
     def __init__(self):
         # Инициализация соединения с базой данных через DatabaseEngine
         self.db_engine = DatabaseEngine(DatabaseConfig.get_config())
 
-    def get_employees(self, filters: dict):
+    def get_tasks(self, filters: dict):
         """
         Получает список сотрудников с фильтрацией.
         :param filters: Словарь с фильтрами (например, {"role": "manager"}).
         :return: Список сотрудников.
         """
-        employees = self.db_engine.get("Employee", filters=filters)
-        return employees
+        tasks = self.db_engine.get("CompletedTasks", filters=filters)
+        return tasks
 
-    def add_employee(self, data: dict) -> str:
+    def add_tasks(self, data: dict) -> str:
         """
-        Добавляет нового сотрудника.
+        Добавляет ново.
         :param data: Словарь с данными сотрудника (например, {"name": "John", "role": "manager"}).
         :return: Результат добавления.
         """
         try:
-            employee = Employee.from_json(data=data)
+            tasks = CompletedTasks.from_json("CompletedTasks", data=data)
         except Exception as e:
             return "Add failed"
 
-        return self.db_engine.add(employee)
+        return self.db_engine.add(tasks)
 
-    def delete_employee(self, data: dict):
+    def delete_tasks(self, data: dict):
         """
         Удаляет сотрудника по его ID.
+        :param data:
         :param employee_id: Идентификатор сотрудника.
         :return: Результат удаления.
         """
-        self.db_engine.delete("Employee", data)
-        return "delete_employee"
+        self.db_engine.delete("CompletedTasks", data)
+        return "delete_resources"
 
-    def upadate_employee(self, data: dict):
+    def update_tasks(self, data: dict):
         """
         Удаляет сотрудника по его ID.
         :param employee_id: Идентификатор сотрудника.
         :return: Результат удаления.
         """
         try:
-            employee = Employee.from_json_for_update("Employee", data=data)
+            tasks = CompletedTasks.from_json_for_update("CompletedTasks", data=data)
         except Exception as e:
             return None
 
-        res = self.db_engine.update(employee)
+        res = self.db_engine.update(tasks)
         return res
 
 
