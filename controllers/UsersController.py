@@ -6,10 +6,8 @@ from services.LoginService import LoginService
 from services.UserService import UsersService
 from utils.auth_utils import roles_required
 
-# Создаем Blueprint
 users_bp = Blueprint('users', __name__, url_prefix='/users')
 
-# Пример сервиса
 users_service = UsersService()
 
 
@@ -17,9 +15,9 @@ users_service = UsersService()
 @users_bp.route('/', methods=['POST'])
 @roles_required('admin')
 def add_user():
-    data = request.json
+    data = request.get_json(silent=True) or {}
     res = users_service.add_user(data)
-    return res
+    return jsonify(res), 200
 
 @users_bp.route('/', methods=['GET'])
 @roles_required('admin')
@@ -27,7 +25,7 @@ def get_users():
     filters = request.get_json(silent=True) or {}
 
     employees = users_service.get_users(filters)
-    return jsonify(employees)
+    return jsonify(employees), 200
 
 
 @users_bp.route('/', methods=['DELETE'])
@@ -35,8 +33,7 @@ def get_users():
 def delete_user():
     data = request.json
     res = users_service.delete_user(data)
-    return res
-
+    return jsonify(res), 200
 
 @users_bp.route('/', methods=['PUT'])
 @roles_required('admin')

@@ -6,10 +6,8 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from services.EmployeeService import EmployeeService
 from utils.auth_utils import roles_required
 
-# Создаем Blueprint
 employee_bp = Blueprint('employee', __name__, url_prefix='/employees')
 
-# Пример сервиса
 employee_service = EmployeeService()
 
 @employee_bp.route('/', methods=['GET'])
