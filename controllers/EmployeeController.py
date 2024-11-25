@@ -29,26 +29,29 @@ def get_employees():
             filters["id_employee"] = user_info["user_id"]
 
     employees = employee_service.get_employees(filters)
-    return jsonify(employees)
+    return jsonify(employees), 200
 
 @employee_bp.route('/', methods=['POST'])
 @roles_required('admin')
 def create_employee():
     data = request.json
-    employee = employee_service.add_employee(data)
-    return employee
+    res = employee_service.add_employee(data)
+    return jsonify(res), 200
 
 @employee_bp.route('/', methods=['DELETE'])
 @roles_required('admin')
 def delete_employee():
     data = request.json
     res = employee_service.delete_employee(data)
-    return res
+    return jsonify(res), 200
 
 
-@employee_bp.route('/', methods=['UPDATE'])
+@employee_bp.route('/', methods=['PUT'])
 @roles_required('admin')
 def update_employee():
     data = request.json
-    employee = employee_service.upadate_employee(data)
-    return employee
+    result = employee_service.upadate_employee(data)
+    if result is None:
+        result = "Failed"
+
+    return jsonify(result), 200

@@ -70,28 +70,25 @@ class DatabaseEngine:
         print(sql_query)
         conn = get_db_connection(self.config)
         if conn is None:
-            return -1
+            return "DB connect fail"
         cur = conn.cursor()
         try:
             cur.execute(sql_query)
             user_id = cur.fetchone()[0]
             conn.commit()
-            message = {'message': f'Add user success', 'id': str(user_id)}
-            status = 201
+            message = f"Add row success id= {user_id}"
         except psycopg2.IntegrityError:
             conn.rollback()
-            message = {'error': 'Duplicate'}
-            status = 400
+            message = "Duplicate row found"
         finally:
             cur.close()
             conn.close()
 
-        return jsonify(message), status
+        return message
 
     def get(self, table_name: str, filters: dict):
 
         query = f"SELECT * FROM \"{table_name}\" WHERE TRUE"
-        filter_values = []
 
         if filters:
             for column, value in filters.items():
@@ -140,16 +137,15 @@ class DatabaseEngine:
         try:
             cur.execute(sql_query)
             conn.commit()
-            message = {'message': 'Rows updated'}
-            status = 200
+            message = "Update success"
         except Exception as e:
             conn.rollback()
-            message = {'error': f'Error: {e}'}
-            status = 400
+            message = "Update fail"
+
         finally:
             cur.close()
             conn.close()
-        return jsonify(message), status
+        return message
 
     def delete(self, table_name:str, primary_keys: dict):
         conn = get_db_connection(self.config)
@@ -178,14 +174,11 @@ class DatabaseEngine:
             conn.commit()
         except Exception as e:
             conn.rollback()
-            message = {'error': f'Error: {e}'}
-            status = 400
-            return jsonify(message), status
+            return "Error"
         finally:
             cur.close()
             conn.close()
-            status = 200
-            return jsonify({'message': 'Row deleted!'}), status
+            return 'Row deleted!'
 
     def get_user(self, username):
         """Возвращает None или id pass_hash role"""

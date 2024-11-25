@@ -18,16 +18,16 @@ class EmployeeService:
         employees = self.db_engine.get("Employee", filters=filters)
         return employees
 
-    def add_employee(self, data: dict):
+    def add_employee(self, data: dict) -> str:
         """
         Добавляет нового сотрудника.
         :param data: Словарь с данными сотрудника (например, {"name": "John", "role": "manager"}).
         :return: Результат добавления.
         """
-
-        employee = Employee.from_json(data=data)
-        print(employee)
-
+        try:
+            employee = Employee.from_json(data=data)
+        except Exception as e:
+            return "Add failed"
 
         return self.db_engine.add(employee)
 
@@ -46,5 +46,12 @@ class EmployeeService:
         :param employee_id: Идентификатор сотрудника.
         :return: Результат удаления.
         """
-        return "upadate_employee"
+        try:
+            employee = Employee.from_json_for_update("Employee", data=data)
+        except Exception as e:
+            return None
+
+        res = self.db_engine.update(employee)
+        return res
+
 
