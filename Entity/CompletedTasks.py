@@ -1,6 +1,4 @@
-from datetime import datetime
-
-from Entity.DbObject import DbObject
+from database.DbObject import DbObject
 
 
 class CompletedTasks(DbObject):

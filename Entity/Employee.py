@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from Entity.DbObject import DbObject
+from database.DbObject import DbObject
+from utils.utils import parse_datetime
 
 
 class Employee(DbObject):
@@ -15,7 +16,7 @@ class Employee(DbObject):
         self.status_employee = status_employee
 
     @classmethod
-    def from_json(cls, table_name:str ,data: dict[str, str| int]):
+    def from_json(cls, data: dict[str, str| int], table_name="Employee"):
         if 'id' not in data:
             data['id'] = None
 

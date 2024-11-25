@@ -1,6 +1,7 @@
 from datetime import datetime
 
-from Entity.DbObject import DbObject
+from database.DbObject import DbObject
+
 
 
 class ExperimentJournal(DbObject):
@@ -8,8 +9,8 @@ class ExperimentJournal(DbObject):
         super().__init__(id=id, table_name=table_name)
         self.name = name
         self.description = description
-        self.start = start
-        self.end = end
+        self.start = start_experiment
+        self.end = end_experiment
         self.status = status
         self.id_employee = id_employee
         self.id_mission = id_mission

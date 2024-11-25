@@ -1,19 +1,8 @@
 from datetime import datetime
 
-from Entity.DbObject import DbObject
+from database.DbObject import DbObject
+from utils.utils import parse_datetime
 
-def parse_datetime(date_str: str) -> datetime|None:
-    """
-    Преобразует строку с датой в формате 2003-08-16 в объект datetime.
-
-    :param date_str: Строка с датой.
-    :return: Объект datetime.
-    """
-    try:
-        return datetime.strptime(date_str, "%Y-%m-%d")
-    except ValueError:
-        print(f"Ошибка парсинга: неверный формат даты '{date_str}'. Ожидается формат 'YYYY-MM-DD'.")
-        return None
 
 class Mission(DbObject):
     def __init__(self, id:int, table_name: str, name:str, start_mission: datetime, end_mission: datetime, description:str, status_mission: str, id_employee:int):

@@ -1,6 +1,6 @@
 from datetime import datetime
-
-from Entity.DbObject import DbObject
+from database.DbObject import DbObject
+from utils.utils import parse_datetime
 
 
 class TaskJournal(DbObject):

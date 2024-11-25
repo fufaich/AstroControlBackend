@@ -1,32 +1,12 @@
-from datetime import datetime
 import psycopg2
 from flask import jsonify
-from psycopg2 import OperationalError
-from contextlib import contextmanager
 from typing import Optional
 
-from Entity.DbObject import DbObject
+from database.DatabaseConfig import DatabaseConfig
+from database.DbObject import DbObject
 from utils.utils import get_str_attributes, get_str_values, clean_dict
 
 
-# Класс для конфигурации базы данных
-class DatabaseConfig:
-    def __init__(self, dbname: str, dbuser: str, dbpassword: str, dbhost: str, port: int):
-        self.dbname = dbname
-        self.dbuser = dbuser
-        self.dbpassword = dbpassword
-        self.dbhost = dbhost
-        self.port = port
-
-    def as_dict(self) -> dict:
-        """Возвращает конфигурацию в виде словаря."""
-        return {
-            'dbname': self.dbname,
-            'user': self.dbuser,
-            'password': self.dbpassword,
-            'host': self.dbhost,
-            'port': self.port
-        }
 
 def get_db_connection(config: DatabaseConfig) -> Optional[psycopg2.connect]:
     """Контекстный менеджер для работы с подключением к базе данных."""
@@ -115,13 +95,13 @@ class DatabaseEngine:
 
         if filters:
             for column, value in filters.items():
-                query += f" AND {column} ILIKE %s"  # Используем ILIKE для нечувствительности к регистру
-                filter_values.append(f"%{value}%")
+                query += f" AND {column} = {value}"  # Используем ILIKE для нечувствительности к регистру
+
 
         conn = get_db_connection(self.config)
         cur = conn.cursor()
         try:
-            cur.execute(query, filter_values)
+            cur.execute(query)
             data = cur.fetchall()
         except Exception:
             conn.rollback()
