@@ -35,4 +35,4 @@ class LoginService:
             "role": role
         }
         access_token = create_access_token(identity=json.dumps(user_info))
-        return jsonify({'access_token': access_token})
+        return jsonify({'access_token': access_token, 'role': role})
