@@ -13,7 +13,7 @@ class ExperimentJournalService:
         :param filters: Словарь с фильтрами (например, {"role": "manager"}).
         :return: Список сотрудников.
         """
-        experiment = self.db_engine.get("Resources", filters=filters)
+        experiment = self.db_engine.get("ExperimentJournal", filters=filters)
         return experiment
 
     def add_experiment(self, data: dict) -> str:

@@ -21,7 +21,7 @@ def add_mission():
 @jwt_required()
 def get_mission():
     data = request.get_json(silent=True) or {}
-    res = missions_service.add_mission(data)
+    res = missions_service.get_mission(data)
     return jsonify(res), 200
 
 @missions_bp.route('/', methods=['DELETE'])

@@ -12,6 +12,7 @@ utils_service = UtilsService()
 
 
 @utils_bp.route('/<string:table_name>', methods=['GET'])
+@jwt_required()
 def get_resource(table_name: str):
     res = utils_service.get_collumns_table(table_name)
     return jsonify(res), 200

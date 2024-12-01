@@ -21,7 +21,7 @@ def add_reports():
 @jwt_required()
 def get_reports():
     data = request.get_json(silent=True) or {}
-    res = reports_journal_service.add_reports(data)
+    res = reports_journal_service.get_reports(data)
     return jsonify(res), 200
 
 @reports_journal_bp.route('/', methods=['DELETE'])

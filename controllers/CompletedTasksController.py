@@ -22,14 +22,14 @@ def add_resource():
 @roles_required("admin")
 def get_resource():
     data = request.get_json(silent=True) or {}
-    res = completed_tasks_service.update_tasks(data)
+    res = completed_tasks_service.get_tasks(data)
     return jsonify(res), 200
 
 @completed_tasks_bp.route('/', methods=['DELETE'])
 @roles_required("admin")
 def delete_resource():
     data = request.get_json(silent=True) or {}
-    res = completed_tasks_service.update_tasks(data)
+    res = completed_tasks_service.delete_tasks(data)
     return jsonify(res), 200
 
 @completed_tasks_bp.route('/', methods=['PUT'])
