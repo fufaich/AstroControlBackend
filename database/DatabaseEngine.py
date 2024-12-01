@@ -193,3 +193,16 @@ class DatabaseEngine:
             return None
         return user[0], user[1], user[2]
 
+    def get_collumns_name(self, table_name):
+        conn = get_db_connection(self.config)
+        cur = conn.cursor()
+        sql_query = f"SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = \'{table_name}\';"
+        cur.execute(sql_query)
+        data = cur.fetchall()
+        cur.close()
+        conn.close()
+        len_data = len(data)
+        if len_data  == 0:
+            return None
+        return data
+
