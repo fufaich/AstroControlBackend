@@ -13,9 +13,6 @@ class UtilsService:
 
 
     def get_collumns_table(self, table_name:dict):
-        if "name" not in table_name:
-            return "Requered 'name' : table_name"
-
-        employees = self.db_engine.get_collumns_name(table_name["name"])
+        employees = self.db_engine.get_collumns_name(table_name)
         return employees
 

@@ -11,10 +11,9 @@ utils_bp = Blueprint('utils', __name__, url_prefix='/utils')
 utils_service = UtilsService()
 
 
-@utils_bp.route('/', methods=['GET'])
-def get_resource():
-    data = request.get_json(silent=True) or {}
-    res = utils_service.get_collumns_table(data)
+@utils_bp.route('/<string:table_name>', methods=['GET'])
+def get_resource(table_name: str):
+    res = utils_service.get_collumns_table(table_name)
     return jsonify(res), 200
 
 
