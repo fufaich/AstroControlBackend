@@ -1,3 +1,5 @@
+import json
+
 import bcrypt
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
@@ -22,8 +24,15 @@ def add_task():
 @task_journal_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_task():
-    data = request.get_json(silent=True) or {}
-    res = task_journal_service.get_task(data)
+    try:
+        filters = request.args.to_dict()
+        print(f"filters: {filters}")
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON in headers"}), 400
+    res = task_journal_service.get_task(filters)
+    if "message" in res:
+        if res["message"] == "invalid filter":
+            return jsonify({"error": "Invalid filter"}), 400
     return jsonify(res), 200
 
 @task_journal_bp.route('/', methods=['DELETE'])

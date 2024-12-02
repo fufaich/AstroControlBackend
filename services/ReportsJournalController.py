@@ -13,7 +13,7 @@ class ReportsJournalService:
         :param filters: Словарь с фильтрами (например, {"role": "manager"}).
         :return: Список сотрудников.
         """
-        reports = self.db_engine.get("Resources", filters=filters)
+        reports = self.db_engine.get("ReportsJournal", filters=filters)
         return reports
 
     def add_reports(self, data: dict) -> str:

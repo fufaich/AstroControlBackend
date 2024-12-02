@@ -1,3 +1,5 @@
+import json
+
 import bcrypt
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
@@ -22,9 +24,16 @@ def add_user():
 @users_bp.route('/', methods=['GET'])
 @roles_required('admin')
 def get_users():
-    filters = request.get_json(silent=True) or {}
+    try:
+        filters = request.args.to_dict()
+        print(f"filters: {filters}")
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON in headers"}), 400
 
     employees = users_service.get_users(filters)
+    if "message" in employees:
+        if employees["message"] == "invalid filter":
+            return jsonify({"error": "Invalid filter"}), 400
     return jsonify(employees), 200
 
 

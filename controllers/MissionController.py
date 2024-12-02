@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 
@@ -20,8 +22,15 @@ def add_mission():
 @missions_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_mission():
-    data = request.get_json(silent=True) or {}
-    res = missions_service.get_mission(data)
+    try:
+        filters = request.args.to_dict()
+        print(f"filters: {filters}")
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON in headers"}), 400
+    res = missions_service.get_mission(filters)
+    if "message" in res:
+        if res["message"] == "invalid filter":
+            return jsonify({"error": "Invalid filter"}), 400
     return jsonify(res), 200
 
 @missions_bp.route('/', methods=['DELETE'])

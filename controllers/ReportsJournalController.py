@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 
@@ -20,8 +22,15 @@ def add_reports():
 @reports_journal_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_reports():
-    data = request.get_json(silent=True) or {}
-    res = reports_journal_service.get_reports(data)
+    try:
+        filters = request.args.to_dict()
+        print(f"filters: {filters}")
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON in headers"}), 400
+    res = reports_journal_service.get_reports(filters)
+    if "message" in res:
+        if res["message"] == "invalid filter":
+            return jsonify({"error": "Invalid filter"}), 400
     return jsonify(res), 200
 
 @reports_journal_bp.route('/', methods=['DELETE'])

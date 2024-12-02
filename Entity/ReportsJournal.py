@@ -17,12 +17,12 @@ class ReportsJournal(DbObject):
     @classmethod
     def from_json(cls, table_name:str ,data: dict[str, str| int]):
 
-        data = parse_datetime(data['data'])
-        if data is None:
+        datatime = parse_datetime(data['data'])
+        if datatime is None:
             return None
 
 
-        return cls(data['id_report'], table_name, data['header'], data['content'], data, data['id_employee'])
+        return cls(data['id_report'], table_name, data['header'], data['content'], datatime, data['id_employee'])
 
     @classmethod
     def clean(cls):

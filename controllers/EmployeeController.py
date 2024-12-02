@@ -13,7 +13,11 @@ employee_service = EmployeeService()
 @employee_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_employees():
-    filters = request.get_json(silent=True) or {}
+    try:
+        filters = request.args.to_dict()
+        print(f"filters: {filters}")
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON in headers"}), 400
     current_user = get_jwt_identity()  # Это значение 'sub' из токена
     user_info = json.loads(current_user)
     if "role" not in user_info:
@@ -25,8 +29,10 @@ def get_employees():
             employees = employee_service.get_employees(filters)
         case _:
             filters["id_employee"] = user_info["user_id"]
-
-    employees = employee_service.get_employees(filters)
+            employees = employee_service.get_employees(filters)
+    if "message" in employees:
+        if employees["message"] == "invalid filter":
+            return jsonify({"error": "Invalid filter"}), 400
     return jsonify(employees), 200
 
 @employee_bp.route('/', methods=['POST'])

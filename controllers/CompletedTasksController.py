@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 
@@ -21,8 +23,12 @@ def add_resource():
 @completed_tasks_bp.route('/', methods=['GET'])
 @roles_required("admin")
 def get_resource():
-    data = request.get_json(silent=True) or {}
-    res = completed_tasks_service.get_tasks(data)
+    try:
+        filters = request.args.to_dict()
+        print(f"filters: {filters}")
+    except json.JSONDecodeError:
+        return jsonify({"error": "Invalid JSON in headers"}), 400
+    res = completed_tasks_service.get_tasks(filters)
     return jsonify(res), 200
 
 @completed_tasks_bp.route('/', methods=['DELETE'])
