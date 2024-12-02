@@ -25,7 +25,7 @@ class ExperimentJournalService:
         try:
             experiment = ExperimentJournal.from_json("ExperimentJournal", data=data)
         except Exception as e:
-            return "Add failed"
+            return f"Add failed: {e}"
 
         return self.db_engine.add(experiment)
 

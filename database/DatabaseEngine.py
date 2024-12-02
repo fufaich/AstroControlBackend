@@ -63,8 +63,16 @@ class DatabaseEngine:
         if db_object.table_name is None:
             return -1
         list_attributes, list_values = db_object.get_attributes()
+        pk_list = self.get_first_n_collumns_name(db_object.table_name)
+        if len(pk_list) == 1:
+            for pk in pk_list:
+                index = list_attributes.index(pk)
+                list_attributes.pop(index)
+                list_values.pop(index)
+
         str_attributes = get_str_attributes(list_attributes)
         str_values = get_str_values(list_values)
+
 
         sql_query = f"INSERT INTO \"{db_object.table_name}\" ({str_attributes}) VALUES ({str_values}) RETURNING *"
         print(sql_query)
@@ -122,14 +130,16 @@ class DatabaseEngine:
         id_collumn_name = self.get_first_n_collumns_name(db_object.table_name)
         len_pk = len(id_collumn_name)
         if len_pk == 1:
-            sql_query += f" WHERE {id_collumn_name[0]} = {db_object.id}"
+            id_value = getattr(db_object, id_collumn_name[0])
+            sql_query += f" WHERE {id_collumn_name[0]} = {id_value}"
         else:
             sql_query += f" WHERE "
             for i in range(len_pk):
+                id_value = getattr(db_object, id_collumn_name[i])
                 if i == len_pk - 1:
-                    sql_query += f" {id_collumn_name[i]} = \'{db_object.id}\'"
+                    sql_query += f" {id_collumn_name[i]} = \'{id_value}\'"
                 else:
-                    sql_query += f" {id_collumn_name[i]} = \'{db_object.id}\' AND "
+                    sql_query += f" {id_collumn_name[i]} = \'{id_value}\' AND "
 
 
         conn = get_db_connection(self.config)
@@ -156,7 +166,7 @@ class DatabaseEngine:
         id_collumn_name = self.get_first_n_collumns_name(table_name)
         len_pk = len(id_collumn_name)
 
-        if len_pk!= len(primary_keys):
+        if len_pk > len(primary_keys):
             raise ValueError("Mismatch between primary key structure and provided values")
 
         if len_pk == 1:

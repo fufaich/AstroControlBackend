@@ -1,17 +1,8 @@
 
 
 class DbObject:
-    def __init__(self, id: int, table_name:str):
-        self._id = id
+    def __init__(self, table_name:str):
         self._table_name = table_name
-
-    @property
-    def id(self):
-        return self._id
-
-    @id.setter
-    def id(self, value: int):
-        self._id = value
 
     @property
     def table_name(self):

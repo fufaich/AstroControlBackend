@@ -48,7 +48,7 @@ class TaskJournalService:
         :return: Результат удаления.
         """
         try:
-            task = Employee.from_json_for_update("TaskJournal", data=data)
+            task = TaskJournal.from_json_for_update("TaskJournal", data=data)
         except Exception as e:
             return None
 

@@ -25,7 +25,7 @@ class CompletedTasksService:
         try:
             tasks = CompletedTasks.from_json("CompletedTasks", data=data)
         except Exception as e:
-            return "Add failed"
+            return f"Add failed: {e}"
 
         return self.db_engine.add(tasks)
 

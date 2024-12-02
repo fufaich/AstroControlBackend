@@ -15,7 +15,7 @@ completed_tasks_service = CompletedTasksService()
 @jwt_required()
 def add_resource():
     data = request.get_json(silent=True) or {}
-    res = completed_tasks_service.update_tasks(data)
+    res = completed_tasks_service.add_tasks(data)
     return jsonify(res), 200
 
 @completed_tasks_bp.route('/', methods=['GET'])
